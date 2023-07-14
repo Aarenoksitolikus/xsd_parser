@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class XsdXpathGenerator {
     public static void main(String[] args) {
-        Map<String, String> xpathWithType = getAllXpaths(new File("src/main/resources/xml/XSD CDA/test.xsd"));
+        Map<String, String> xpathWithType = getAllXpaths(new File("src/main/resources/xml/XSD CDA/POCD_MT000040.xsd"));
         for (Map.Entry<String, String> entry : xpathWithType.entrySet()) {
             System.out.println(entry.getKey() + " -->  " + entry.getValue());
         }
@@ -41,7 +41,7 @@ public class XsdXpathGenerator {
 
             for (int i = 0; i < elementList.getLength(); i++) {
                 Element element = (Element) elementList.item(i);
-                if (element.hasAttributes() && !element.getAttribute("type").equals("")) {
+                if (element.hasAttributes() && !element.getAttribute("name").equals("")) {
                     result.put(xpathString(element, new StringBuilder(element.getAttribute("name"))).toString(), extractType(element.getAttribute("type")));
                 }
             }

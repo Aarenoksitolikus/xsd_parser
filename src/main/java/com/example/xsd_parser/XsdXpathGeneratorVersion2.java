@@ -3,83 +3,78 @@ package com.example.xsd_parser;
 import org.springframework.stereotype.Component;
 import org.xmlet.xsdparser.core.XsdParser;
 import org.xmlet.xsdparser.xsdelements.XsdAbstractElement;
-import org.xmlet.xsdparser.xsdelements.XsdElement;
+import org.xmlet.xsdparser.xsdelements.XsdComplexType;
 import org.xmlet.xsdparser.xsdelements.XsdSchema;
+import org.xmlet.xsdparser.xsdelements.elementswrapper.ReferenceBase;
 
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class XsdXpathGeneratorVersion2 {
 
     public static void main(String[] args) {
-        getAllXpath("src/main/resources/xml/XSD CDA/CDA.xsd");
+        getAllXpaths("src/main/resources/xml/XSD CDA/CDA.xsd");
     }
 
-    public static void parse(String fileName) {
+    private static void getAllXpaths(String fileName) {
+        XsdObject document = new XsdObject();
         XsdParser parser = new XsdParser(fileName);
+        List<XsdSchema> schemas = parser.getResultXsdSchemas().toList();
 
-        Stream<XsdElement> resultXsdElements = parser.getResultXsdElements();
-        Stream<XsdSchema> resultXsdSchemas = parser.getResultXsdSchemas();
-
-        resultXsdElements.forEach(e -> {
-            System.out.println(e.getName());
-        });
-    }
-
-    private static void getAllXpath(String fileName) {
-        XsdParser parser = new XsdParser(fileName);
-//        Stream<XsdSchema> schemas = parser.getResultXsdSchemas();
-//        schemas.forEach(e -> {
-//            System.out.println("\n" + e.getFilePath() + "\n");
-//            e.getAttributesMap().forEach((k, v) -> System.out.println("[" + k + ": " + v + "]"));
-//        });
-
-        Stream<XsdElement> elements = parser.getResultXsdElements();
-        elements.forEach(e -> {
-            System.out.println("\n" + e.getName());
-            e.getAttributesMap().forEach((k, v) -> System.out.println("[" + k + ": " + v + "]"));
-            System.out.println("xpath: " + getXpathString(e, new StringBuilder(e.getName())));
-        });
-    }
-
-    private static StringBuilder getXpathString(XsdElement element, StringBuilder xpath) {
-        XsdAbstractElement parent = getParentElement(element);
-        if (parent != null && parent.getAttributesMap().get("name") != null) {
-            xpath = new StringBuilder(parent.getAttributesMap().get("name")).append("/").append(xpath);
-            return getXpathString((XsdElement) parent, xpath);
-        } else return xpath;
-    }
-
-    private static XsdAbstractElement getParentElement(XsdElement element) {
-        if (element.parentAvailable) return element.getParent();
-        else return null;
-    }
-
-//    private static StringBuilder xpathString(Element element, StringBuilder xpath) {
-//        Element parent = getParentElement(element);
-//        if (parent != null) {
-//            if (parent.hasAttributes() && !parent.getAttribute("name").equals("")) {
-//                xpath = new StringBuilder(parent.getAttribute("name")).append("/").append(xpath);
-//                return xpathString(parent, xpath);
-//            } else {
-//                return xpath;
+//        for (XsdSchema schema : schemas) {
+//            for (XsdAbstractElement schemaChild : getSchemaChildren(schema)) {
+//                List<String> childrenNames = getChildrenNames(schemaChild, new StringBuilder("/"), new ArrayList<>());
+//                for (String childrenName : childrenNames) {
+//                    System.out.println(childrenName);
+//                }
 //            }
-//        } else {
-//            return xpath;
 //        }
-//    }
 
-//    private static Element getParentElement(Element element) {
-//        Node parentNode = element.getParentNode();
-//        if (parentNode instanceof Element) {
-//            String nodeName = parentNode.getNodeName();
-//            if (nodeName.equalsIgnoreCase("xs:element")) {
-//                return (Element) element.getParentNode();
-//            } else {
-//                return getParentElement((Element) parentNode);
-//            }
-//        } else {
-//            return null;
-//        }
-//    }
+        for (XsdAbstractElement child : getSchemaChildren(schemas.get(schemas.size() - 1))) {
+            if (!child.getClass().equals(XsdComplexType.class)) {
+                continue;
+            }
+            List<String> xpaths = getChildrenNames(child, new StringBuilder("/"), new ArrayList<>());
+            for (String xpath : xpaths) {
+                System.out.println(xpath);
+            }
+        }
+    }
+
+    private static List<XsdAbstractElement> getSchemaChildren(XsdSchema parentSchema) {
+//        return parentSchema.getXsdElements().toList();
+//        return parentSchema.getChildrenElements().map(XsdAbstractElement.class::cast).toList();
+        return parentSchema.getElements().stream().map(ReferenceBase::getElement).toList();
+    }
+
+    private static List<String> getChildrenNames(XsdAbstractElement parent, StringBuilder xpath, List<String> result) {
+//        List<XsdAbstractElement> children = parent.getXsdElements().toList();
+        List<ReferenceBase> children = parent.getElements();
+
+        String name = parent.getAttributesMap().get("name");
+        String parentClass = parent.getClass().getSimpleName();
+        switch (parentClass) {
+            case "XsdComplexType" -> xpath.append("/xs:complexType");
+            case "XsdAttribute" -> xpath.append("/xs:attribute");
+            case "XsdElement" -> xpath.append("/xs:element");
+            case "XsdSequence" -> xpath.append("/xs:sequence");
+            case "XsdComplexContent" -> xpath.append("/xs:complexContent");
+            case "XsdRestriction" -> xpath.append("/xs:restriction");
+            case "XsdChoice" -> xpath.append("/xs:choice");
+            case "XsdUnion" -> xpath.append("/xs:union");
+            case "XsdAnnotation" -> xpath.append("/xs:annotation");
+            case "XsdDocumentation" -> xpath.append("/xs:documentation");
+            default -> xpath.append("/fuck");
+        }
+        if (name != null && !name.equals("")) xpath.append(String.format("[@name=\"%s\"]", name));
+        if (children != null && !children.isEmpty()) {
+            for (ReferenceBase child : children) {
+                getChildrenNames(child.getElement(), new StringBuilder(xpath), result);
+            }
+        } else {
+            result.add(xpath.toString());
+        }
+        return result;
+    }
 }
