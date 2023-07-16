@@ -30,14 +30,14 @@ public class XsdXpathGenerator {
             Document document = docBuilder.parse(file);
 
             NodeList elementList = document.getElementsByTagName("xs:element");
-            NodeList attributeList = document.getElementsByTagName("xs:attribute");
+//            NodeList attributeList = document.getElementsByTagName("xs:attribute");
 
-            for (int i = 0; i < attributeList.getLength(); i++) {
-                Element element = (Element) attributeList.item(i);
-                if (element.hasAttributes() && !element.getAttribute("type").equals("")) {
-                    result.put(element.getAttribute("name"), extractType(element.getAttribute("type")));
-                }
-            }
+//            for (int i = 0; i < attributeList.getLength(); i++) {
+//                Element element = (Element) attributeList.item(i);
+//                if (element.hasAttributes() && !element.getAttribute("type").equals("")) {
+//                    result.put(element.getAttribute("name"), extractType(element.getAttribute("type")));
+//                }
+//            }
 
             for (int i = 0; i < elementList.getLength(); i++) {
                 Element element = (Element) elementList.item(i);

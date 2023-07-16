@@ -6,15 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class XsdObject {
-    @JsonProperty("type")
-    private final static XsdType type = XsdType.OBJECT;
-    @JsonProperty("properties")
-    private List<XsdProperty> properties;
+public class XsdProperty {
+    private String name;
+    private XsdField content;
+
+    @Override
+    public String toString() {
+        return "\"" + name + "\": {\n" + content.toString() + "\n}";
+    }
 }
