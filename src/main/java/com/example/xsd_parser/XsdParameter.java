@@ -7,12 +7,14 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = false)
-public class XsdParameter extends XsdField {
+@EqualsAndHashCode
+public class XsdParameter implements XsdField {
     @JsonProperty("type")
     private XsdType type;
     @JsonProperty("xml_type")
     private String xmlType;
+    @JsonProperty("xpath")
+    private String xPath;
     @JsonProperty("title")
     private String title;
     @JsonProperty("decode")

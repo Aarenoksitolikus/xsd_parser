@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = false)
-public class XsdArray extends XsdField {
+public class XsdArray implements XsdField {
     @JsonProperty("type")
     private final static XsdType type = XsdType.ARRAY;
 

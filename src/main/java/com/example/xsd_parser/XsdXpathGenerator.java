@@ -1,5 +1,6 @@
 package com.example.xsd_parser;
 
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -14,15 +15,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class XsdXpathGenerator {
-    public static void main(String[] args) {
-        Map<String, String> xpathWithType = getAllXpaths(new File("src/main/resources/xml/XSD CDA/POCD_MT000040.xsd"));
-        for (Map.Entry<String, String> entry : xpathWithType.entrySet()) {
-            System.out.println(entry.getKey() + " -->  " + entry.getValue());
-        }
-    }
-
-    private static Map<String, String> getAllXpaths(File file) {
+    public Map<String, String> getAllXpaths(File file) {
         Map<String, String> result = new HashMap<>();
         try {
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -52,7 +47,7 @@ public class XsdXpathGenerator {
         return result;
     }
 
-    private static StringBuilder xpathString(Element element, StringBuilder xpath) {
+    private StringBuilder xpathString(Element element, StringBuilder xpath) {
         Element parent = getParentElement(element);
         if (parent != null) {
             if (parent.hasAttributes() && !parent.getAttribute("name").equals("")) {
@@ -66,7 +61,7 @@ public class XsdXpathGenerator {
         }
     }
 
-    private static Element getParentElement(Element element) {
+    private Element getParentElement(Element element) {
         Node parentNode = element.getParentNode();
         if (parentNode instanceof Element) {
             String nodeName = parentNode.getNodeName();
@@ -80,7 +75,7 @@ public class XsdXpathGenerator {
         }
     }
 
-    private static String extractType(String type) {
+    private String extractType(String type) {
         if (type.startsWith("xs:")) {
             return type.replace("xs:", "");
         } else {
